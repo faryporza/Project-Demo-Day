@@ -3,9 +3,23 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import VideoFeed from './components/VideoFeed';
 import Dashboard from './components/Dashboard';
+import RtspFeed from './components/rtspFeed';
 
 function App() {
   const [activeTab, setActiveTab] = useState('live');
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'live':
+        return <VideoFeed />;
+      case 'rtspFeed':
+        return <RtspFeed />;
+      case 'dashboard':
+        return <Dashboard />;
+      default:
+        return <VideoFeed />;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
@@ -22,13 +36,7 @@ function App() {
         </div>
         
         {/* Content */}
-        {activeTab === 'live' && (
-          <div className="flex justify-center">
-            <VideoFeed />
-          </div>
-        )}
-        
-        {activeTab === 'dashboard' && <Dashboard />}
+        {renderContent()}
       </main>
       
       <Footer />

@@ -24,7 +24,17 @@ const Header = ({ activeTab, setActiveTab }) => {
                   : 'text-gray-600 dark:text-gray-400 hover:text-blue-500 hover:bg-white dark:hover:bg-gray-600'
               }`}
             >
-              Live Stream
+              Images
+            </button>
+            <button
+              onClick={() => setActiveTab('rtspFeed')}
+              className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'rtspFeed'
+                  ? 'bg-blue-500 text-white shadow-sm'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-blue-500 hover:bg-white dark:hover:bg-gray-600'
+              }`}
+            >
+              RTSP Stream
             </button>
             <button
               onClick={() => setActiveTab('dashboard')}
