@@ -2,15 +2,27 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FiVideo, FiWifi, FiWifiOff, FiSettings, FiMonitor } from 'react-icons/fi';
 
 const RtspFeed = () => {
-  const [apiEndpoint, setApiEndpoint] = useState("http://localhost:8000");
+  // Load from localStorage or use empty string
+  const [apiEndpoint, setApiEndpoint] = useState(() => {
+    return localStorage.getItem('rtsp_api_endpoint') || '';
+  });
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState(null);
   const [gpuStatus, setGpuStatus] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState('disconnected'); // 'disconnected', 'connecting', 'connected', 'error'
   const videoRef = useRef(null);
 
+  // Save to localStorage whenever apiEndpoint changes
+  useEffect(() => {
+    if (apiEndpoint) {
+      localStorage.setItem('rtsp_api_endpoint', apiEndpoint);
+    }
+  }, [apiEndpoint]);
+
   // Check GPU status
   const checkGpuStatus = async () => {
+    if (!apiEndpoint) return; // ป้องกันไม่ให้ fetch ตอนยังไม่กรอก
+    
     try {
       const response = await fetch(`${apiEndpoint}/gpu_status`);
       if (response.ok) {
@@ -24,6 +36,11 @@ const RtspFeed = () => {
 
   // Test API connection
   const testConnection = async () => {
+    if (!apiEndpoint) {
+      setError('กรุณากรอก API Endpoint ก่อน');
+      return;
+    }
+    
     try {
       setConnectionStatus('connecting');
       setError(null);
@@ -45,6 +62,11 @@ const RtspFeed = () => {
 
   // Start video stream
   const startStream = () => {
+    if (!apiEndpoint) {
+      setError('กรุณากรอก API Endpoint ก่อน');
+      return;
+    }
+    
     if (videoRef.current && apiEndpoint) {
       setIsConnected(true);
       setError(null);
@@ -124,11 +146,11 @@ const RtspFeed = () => {
                   value={apiEndpoint}
                   onChange={(e) => setApiEndpoint(e.target.value)}
                   className="flex-1 text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="http://localhost:8000"
+                  placeholder="กรอก API Endpoint เช่น http://localhost:8000"
                 />
                 <button
                   onClick={testConnection}
-                  disabled={connectionStatus === 'connecting'}
+                  disabled={connectionStatus === 'connecting' || !apiEndpoint}
                   className="px-3 py-2 text-xs font-medium rounded-md bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600 shadow disabled:opacity-50"
                 >
                   {connectionStatus === 'connecting' ? 'Testing...' : 'Test'}
@@ -145,6 +167,22 @@ const RtspFeed = () => {
                   {connectionStatus === 'disconnected' && 'ยังไม่ได้เชื่อมต่อ'}
                 </span>
               </div>
+              
+              {/* Clear saved endpoint */}
+              {apiEndpoint && (
+                <button
+                  onClick={() => {
+                    setApiEndpoint('');
+                    localStorage.removeItem('rtsp_api_endpoint');
+                    setGpuStatus(null);
+                    setConnectionStatus('disconnected');
+                    setError(null);
+                  }}
+                  className="w-full text-xs py-1.5 px-2 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+                >
+                  Clear Endpoint
+                </button>
+              )}
             </div>
           </div>
 
